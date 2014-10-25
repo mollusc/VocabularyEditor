@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="filePicker"
+        android:title="@string/interface_settings_vocabulary_path"
+        android:summary="@string/interface_settings_set_new_vocabulary_path"
+        />
+</PreferenceScreen>
