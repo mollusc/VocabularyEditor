@@ -2,9 +2,13 @@ package com.example.valentine.vocabularyeditor;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 
 public class MyActivity extends Activity {
@@ -34,5 +38,18 @@ public class MyActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onClick(View view) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        //getSharedPreferences("settings", MODE_PRIVATE);
+        String pathToDatabase = sp.getString("filePicker", "");
+        try {
+            VocabularyDatabase vd = new VocabularyDatabase(pathToDatabase);
+        }
+        catch (Exception ex) {
+            Log.e("ERROR", "ERROR IN CODE: " + ex.toString());
+            ex.printStackTrace();
+        }
     }
 }

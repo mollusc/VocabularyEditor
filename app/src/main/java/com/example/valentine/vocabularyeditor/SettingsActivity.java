@@ -12,6 +12,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.net.URISyntaxException;
@@ -20,10 +21,6 @@ import java.net.URISyntaxException;
  * Created by valentine on 25.10.14.
  */
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-    //private Preference pref;
-    //String prefixStr;
-
     private static final int FILE_SELECT_CODE = 0;
 
     @Override
@@ -32,13 +29,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         addPreferencesFromResource(R.xml.settings);
         SharedPreferences sp = getPreferenceScreen().getSharedPreferences();
         sp.registerOnSharedPreferenceChangeListener(this);
-        Preference filePicker = (Preference) findPreference("filePicker");
+        Preference filePicker = findPreference("filePicker");
         filePicker.setSummary(sp.getString("filePicker", getString(R.string.interface_settings_set_new_vocabulary_path)));
         filePicker.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 Intent mediaIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                mediaIntent.setType("*/*"); //set mime type as per requirement
+                mediaIntent.setType("*/*");
                 startActivityForResult(mediaIntent, FILE_SELECT_CODE);
                 return true;
             }
@@ -47,11 +44,8 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
     {
-        //Get the current summary
         Preference pref = findPreference(key);
         String prefixStr = sharedPreferences.getString(key, "");
-
-        //Update the summary with user input data
         pref.setSummary(prefixStr);
     }
 
@@ -63,7 +57,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                     // Get the Uri of the selected file
                     Uri uri = data.getData();
                     // Get the path
-                    String path = getPath(uri);
+                    String path = getRealPathFromURI(this, uri);
                     // Write Preferences
                     SharedPreferences preferences =  PreferenceManager.getDefaultSharedPreferences(this);
                     SharedPreferences.Editor editor = preferences.edit();
@@ -75,25 +69,22 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private String getPath(Uri uri){
-        if ("content".equalsIgnoreCase(uri.getScheme())) {
-            String[] projection = { "_data" };
-            Cursor cursor = null;
 
-            try {
-                cursor = getContentResolver().query(uri, projection, null, null, null);
-                int column_index = cursor.getColumnIndexOrThrow("_data");
-                if (cursor.moveToFirst()) {
-                    return cursor.getString(column_index);
-                }
-            } catch (Exception e) {
-                return null;
+    // http://stackoverflow.com/a/3414749
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
             }
         }
-        else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
-        }
-
-        return null;
     }
+
+
 }
