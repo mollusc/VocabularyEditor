@@ -1,22 +1,64 @@
 package com.example.valentine.vocabularyeditor;
 
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.AbsListView;
+import android.widget.NumberPicker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class MyActivity extends Activity {
+public class MyActivity extends  ListActivity {
+
+    private VocabularyListAdapter _adapter;
+    private VocabularyDatabase _vocabularyDatabase;
+    private AsyncListViewLoader _loadingTask;
+    private int _offset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
+        loadDatabase();
+        //_loadingTask = new AsyncListViewLoader();
+        _offset = 0;
+        _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset));
+        setListAdapter(_adapter);
+
+        getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
+
+            @Override
+            public void onScrollStateChanged(AbsListView arg0, int arg1) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisible, int visibleCount, int totalCount) {
+                boolean loadMore = firstVisible + visibleCount >= totalCount;
+                if (loadMore && _loadingTask.getStatus() == AsyncTask.Status.FINISHED) {
+                    _loadingTask = new AsyncListViewLoader();
+                    _loadingTask.execute();
+                }
+            }
+        });
+    }
+
+    private void loadDatabase() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        String pathToDatabase = sp.getString("filePicker", "");
+        try {
+            _vocabularyDatabase = new VocabularyDatabase(pathToDatabase);
+        }
+        catch (Exception ex) {
+            Log.e("ERROR", "ERROR IN CODE: " + ex.toString());
+            ex.printStackTrace();
+        }
     }
 
 
@@ -40,16 +82,27 @@ public class MyActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onClick(View view) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        //getSharedPreferences("settings", MODE_PRIVATE);
-        String pathToDatabase = sp.getString("filePicker", "");
-        try {
-            VocabularyDatabase vd = new VocabularyDatabase(pathToDatabase);
+    private class AsyncListViewLoader extends AsyncTask<String, Void, List<ItemVocabulary>> {
+
+        @Override
+        protected void onPostExecute(List<ItemVocabulary> result) {
+            super.onPostExecute(result);
+            _adapter.add(result);
+            _adapter.notifyDataSetChanged();
         }
-        catch (Exception ex) {
-            Log.e("ERROR", "ERROR IN CODE: " + ex.toString());
-            ex.printStackTrace();
+
+        @Override
+        protected List<ItemVocabulary> doInBackground(String... params) {
+            List<ItemVocabulary> result;
+            try {
+                _offset++;
+                result = _vocabularyDatabase.GetRows(_offset * 15);
+                return result;
+            }
+            catch(Throwable t) {
+                t.printStackTrace();
+            }
+            return null;
         }
     }
 }
