@@ -4,6 +4,7 @@
     <string name="app_name">VocabularyEditor</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_close">Close</string>
 
     <string	name="vocabulary_path">Путь к словарю</string>
     <string name="interface_settings">Выбор пути к файлу словаря</string>

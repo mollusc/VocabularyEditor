@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.preference.PreferenceManager;
 
 import java.io.File;
@@ -22,8 +23,17 @@ public class VocabularyDatabase {
     private final int _limit = 15;
 
     public VocabularyDatabase(String pathToVocabulary) {
-        pathToVocabulary = "/mnt/sdcard/Android/data/com.dropbox.android/files/scratch/LinguaSubtitle/Vocabulary.db";
-        db = SQLiteDatabase.openDatabase(pathToVocabulary, null, 0);
+        /*db = null;
+        try {*/
+            db = SQLiteDatabase.openDatabase(pathToVocabulary, null, 0);
+
+        /*}
+        catch(SQLiteException e) {
+            // Log an info message stating database doesn't exist.
+        }*/
+
+        //pathToVocabulary = "/mnt/sdcard/Android/data/com.dropbox.android/files/scratch/LinguaSubtitle/Vocabulary.db";
+
     }
 
     public ArrayList<ItemVocabulary> GetRows(int offset){
@@ -51,6 +61,7 @@ public class VocabularyDatabase {
     }
 
     public void close(){
-       db.close();
+        if(db != null)
+            db.close();
     }
 }

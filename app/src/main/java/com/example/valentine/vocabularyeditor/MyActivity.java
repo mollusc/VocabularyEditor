@@ -28,11 +28,8 @@ public class MyActivity extends  ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         loadDatabase();
-        //_loadingTask = new AsyncListViewLoader();
-        _offset = 0;
-        _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset));
-        setListAdapter(_adapter);
         _loadingTask = new AsyncListViewLoader();
         _asyncUpdateDatabase = new AsyncUpdateDatabase();
         getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
@@ -51,10 +48,15 @@ public class MyActivity extends  ListActivity {
     }
 
     private void loadDatabase() {
+        _vocabularyDatabase = null;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         String pathToDatabase = sp.getString("filePicker", "");
         try {
             _vocabularyDatabase = new VocabularyDatabase(pathToDatabase);
+            _offset = 0;
+            _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset));
+            setListAdapter(_adapter);
+            return;
         }
         catch (Exception ex) {
             Log.e("ERROR", "ERROR IN CODE: " + ex.toString());
@@ -65,22 +67,31 @@ public class MyActivity extends  ListActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
+            loadDatabase();
+            return true;
+        }
+        if (id == R.id.action_close){
+            finish();
+            System.exit(0);
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        if(_vocabularyDatabase != null)
+            _vocabularyDatabase.close();
     }
 
     @Override
@@ -95,6 +106,13 @@ public class MyActivity extends  ListActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(_vocabularyDatabase != null)
+            _vocabularyDatabase.close();
+    }
+
     private class AsyncListViewLoader extends AsyncTask<Void, Void, List<ItemVocabulary>> {
         private ProgressDialog dialog = new ProgressDialog(MyActivity.this);
 
@@ -107,8 +125,10 @@ public class MyActivity extends  ListActivity {
         @Override
         protected void onPostExecute(List<ItemVocabulary> result) {
             super.onPostExecute(result);
-            _adapter.add(result);
-            _adapter.notifyDataSetChanged();
+            if(result != null) {
+                _adapter.add(result);
+                _adapter.notifyDataSetChanged();
+            }
 
             if (dialog.isShowing()) {
                 dialog.dismiss();
@@ -119,9 +139,11 @@ public class MyActivity extends  ListActivity {
         protected List<ItemVocabulary> doInBackground(Void... params) {
             List<ItemVocabulary> result;
             try {
-                _offset++;
-                result = _vocabularyDatabase.GetRows(_offset * 15);
-                return result;
+                if(_vocabularyDatabase != null) {
+                    _offset++;
+                    result = _vocabularyDatabase.GetRows(_offset * 15);
+                    return result;
+                }
             }
             catch(Throwable t) {
                 t.printStackTrace();
@@ -134,12 +156,13 @@ public class MyActivity extends  ListActivity {
 
         @Override
         protected Void doInBackground(ItemVocabulary... itemVocabularies) {
-            for (ItemVocabulary i : itemVocabularies)
-            {
-                boolean k = i.known, s = i.study;
-                i.study = !(k && s);
-                i.known = !(k && s) && (k || s);
-                _vocabularyDatabase.SetState(i.stem, i.study, i.known);
+            if(_vocabularyDatabase != null) {
+                for (ItemVocabulary i : itemVocabularies) {
+                    boolean k = i.known, s = i.study;
+                    i.study = !(k && s);
+                    i.known = !(k && s) && (k || s);
+                    _vocabularyDatabase.SetState(i.stem, i.study, i.known);
+                }
             }
             return null;
         }
