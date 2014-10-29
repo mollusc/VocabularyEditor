@@ -1,6 +1,7 @@
 package com.example.valentine.vocabularyeditor;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,14 +51,22 @@ public class VocabularyListAdapter extends ArrayAdapter<ItemVocabulary> {
         TextView translateView = (TextView) convertView.findViewById(R.id.TranslateView);
         wordView.setText(i.word);
         translateView.setText(i.translate);
+
+        wordView.setTextColor(Color.BLACK);
+        translateView.setTextColor(Color.BLACK);
+        convertView.setBackgroundColor(Color.WHITE);
+
+        if(i.study){
+            wordView.setTextColor(_context.getResources().getColor(R.color.text_study_word));
+            translateView.setTextColor(_context.getResources().getColor(R.color.text_study_word));
+        }
+
+        if(i.known){
+            convertView.setBackgroundColor(_context.getResources().getColor(R.color.background_known_word));
+        }
+
         return convertView;
     }
-
-
-    public void set_itemList(List<ItemVocabulary> itemList) {
-        _itemList = itemList;
-    }
-
     public void add(List<ItemVocabulary> itemList) {
         _itemList.addAll(itemList);
     }

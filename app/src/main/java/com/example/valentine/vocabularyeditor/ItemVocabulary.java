@@ -10,26 +10,31 @@ package com.example.valentine.vocabularyeditor;
  */
 public class ItemVocabulary {
     //<editor-fold desc="Public Fields">
+
+    /**
+     * Stem
+     */
+    public final String stem;
     /**
      * Word
      */
-    public final String word;
+    public String word;
     /**
      * Translation of the word
      */
-    public final String translate;
+    public String translate;
     /**
      * Is word known?
      */
-    public final boolean known;
+    public boolean known;
     /**
      * Is word study?
      */
-    public final boolean study;
+    public boolean study;
     /**
      * Number of meeting in the subtitle
      */
-    public final int meeting;
+    public int meeting;
     //</editor-fold>
 
     //<editor-fold desc="Constructor">
@@ -43,7 +48,8 @@ public class ItemVocabulary {
      * @param meeting   number of meeting in the subtitle
      * @param study     Is word study?
      */
-    public ItemVocabulary(String word, String translate, boolean known, int meeting, boolean study) {
+    public ItemVocabulary(String stem, String word, String translate, boolean known, int meeting, boolean study) {
+        this.stem = stem;
         this.word = word;
         this.translate = translate;
         this.known = known;

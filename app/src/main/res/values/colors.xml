@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text_study_word">#FF038F6B</color>
+    <color name="background_known_word">#FF959595</color>
+</resources>

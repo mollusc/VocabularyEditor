@@ -1,6 +1,7 @@
 package com.example.valentine.vocabularyeditor;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -9,10 +10,10 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AbsListView;
-import android.widget.NumberPicker;
+import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,6 +23,7 @@ public class MyActivity extends  ListActivity {
     private VocabularyDatabase _vocabularyDatabase;
     private AsyncListViewLoader _loadingTask;
     private int _offset;
+    private AsyncUpdateDatabase _asyncUpdateDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,17 +33,16 @@ public class MyActivity extends  ListActivity {
         _offset = 0;
         _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset));
         setListAdapter(_adapter);
-
+        _loadingTask = new AsyncListViewLoader();
+        _asyncUpdateDatabase = new AsyncUpdateDatabase();
         getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
-
             @Override
             public void onScrollStateChanged(AbsListView arg0, int arg1) {
             }
-
             @Override
             public void onScroll(AbsListView view, int firstVisible, int visibleCount, int totalCount) {
                 boolean loadMore = firstVisible + visibleCount >= totalCount;
-                if (loadMore && _loadingTask.getStatus() == AsyncTask.Status.FINISHED) {
+                if (loadMore && (_loadingTask.getStatus() == AsyncTask.Status.FINISHED || _loadingTask.getStatus() == AsyncTask.Status.PENDING)) {
                     _loadingTask = new AsyncListViewLoader();
                     _loadingTask.execute();
                 }
@@ -82,17 +83,40 @@ public class MyActivity extends  ListActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class AsyncListViewLoader extends AsyncTask<String, Void, List<ItemVocabulary>> {
+    @Override
+    protected void onListItemClick(ListView l, View v, int pos, long id) {
+        super.onListItemClick(l, v, pos, id);
+
+        ItemVocabulary i = (ItemVocabulary)this.getListAdapter().getItem(pos);
+        if (_asyncUpdateDatabase.getStatus() == AsyncTask.Status.FINISHED || _asyncUpdateDatabase.getStatus() == AsyncTask.Status.PENDING) {
+            _asyncUpdateDatabase = new AsyncUpdateDatabase();
+            _asyncUpdateDatabase.execute(i);
+        }
+
+    }
+
+    private class AsyncListViewLoader extends AsyncTask<Void, Void, List<ItemVocabulary>> {
+        private ProgressDialog dialog = new ProgressDialog(MyActivity.this);
+
+        @Override
+        protected void onPreExecute() {
+            this.dialog.setMessage("Load words");
+            this.dialog.show();
+        }
 
         @Override
         protected void onPostExecute(List<ItemVocabulary> result) {
             super.onPostExecute(result);
             _adapter.add(result);
             _adapter.notifyDataSetChanged();
+
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
         }
 
         @Override
-        protected List<ItemVocabulary> doInBackground(String... params) {
+        protected List<ItemVocabulary> doInBackground(Void... params) {
             List<ItemVocabulary> result;
             try {
                 _offset++;
@@ -103,6 +127,28 @@ public class MyActivity extends  ListActivity {
                 t.printStackTrace();
             }
             return null;
+        }
+    }
+
+    private class AsyncUpdateDatabase extends AsyncTask<ItemVocabulary, Void, Void> {
+
+        @Override
+        protected Void doInBackground(ItemVocabulary... itemVocabularies) {
+            for (ItemVocabulary i : itemVocabularies)
+            {
+                boolean k = i.known, s = i.study;
+                i.study = !(k && s);
+                i.known = !(k && s) && (k || s);
+                _vocabularyDatabase.SetState(i.stem, i.study, i.known);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            _adapter.notifyDataSetChanged();
+
         }
     }
 }

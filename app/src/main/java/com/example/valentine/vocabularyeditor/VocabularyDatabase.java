@@ -1,5 +1,7 @@
 package com.example.valentine.vocabularyeditor;
 
+import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,7 +23,6 @@ public class VocabularyDatabase {
 
     public VocabularyDatabase(String pathToVocabulary) {
         pathToVocabulary = "/mnt/sdcard/Android/data/com.dropbox.android/files/scratch/LinguaSubtitle/Vocabulary.db";
-        File dbfile = new File(pathToVocabulary);
         db = SQLiteDatabase.openDatabase(pathToVocabulary, null, 0);
     }
 
@@ -30,15 +31,26 @@ public class VocabularyDatabase {
         String query = "SELECT * FROM Stems WHERE Known=0 ORDER BY Meeting DESC LIMIT ? OFFSET ?";
         Cursor c = db.rawQuery(query, new String[] {Integer.toString(_limit), Integer.toString(offset)});
         while (c.moveToNext()) {
+            String stem = c.getString(c.getColumnIndex("Stem"));
             String word = c.getString(c.getColumnIndex("Word"));
             String translate = c.getString(c.getColumnIndex("Translate"));
             boolean known = c.getString(c.getColumnIndex("Known")).equals("1");
             boolean study = c.getString(c.getColumnIndex("Study")).equals("1");
             int meeting = Integer.parseInt(c.getString(c.getColumnIndex("Meeting")));
-            words.add(new ItemVocabulary(word, translate, known, meeting, study));
+            words.add(new ItemVocabulary(stem, word, translate, known, meeting, study));
         }
         c.close();
         return words;
     }
 
+    public void SetState(String stem, boolean study, boolean known){
+        ContentValues cv = new ContentValues();
+        cv.put("Study", study?"1":"0");
+        cv.put("Known", known?"1":"0");
+        db.update("Stems",cv, "Stem='" + stem + "'", null);
+    }
+
+    public void close(){
+       db.close();
+    }
 }
