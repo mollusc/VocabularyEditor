@@ -54,18 +54,21 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         switch (requestCode) {
             case FILE_SELECT_CODE:
                 if (resultCode == RESULT_OK) {
-                    // Get the Uri of the selected file
                     Uri uri = data.getData();
-                    // Get the path
                     String path = getRealPathFromURI(this, uri);
                     // Write Preferences
                     SharedPreferences preferences =  PreferenceManager.getDefaultSharedPreferences(this);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString("filePicker", path);
                     editor.commit();
+
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("update", true);
+                    setResult(RESULT_OK, returnIntent);
                 }
                 break;
         }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 

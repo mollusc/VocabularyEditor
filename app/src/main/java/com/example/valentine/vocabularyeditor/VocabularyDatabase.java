@@ -23,17 +23,8 @@ public class VocabularyDatabase {
     private final int _limit = 15;
 
     public VocabularyDatabase(String pathToVocabulary) {
-        /*db = null;
-        try {*/
-            db = SQLiteDatabase.openDatabase(pathToVocabulary, null, 0);
-
-        /*}
-        catch(SQLiteException e) {
-            // Log an info message stating database doesn't exist.
-        }*/
-
-        //pathToVocabulary = "/mnt/sdcard/Android/data/com.dropbox.android/files/scratch/LinguaSubtitle/Vocabulary.db";
-
+        pathToVocabulary = "/mnt/sdcard/Android/data/com.dropbox.android/files/scratch/LinguaSubtitle/Vocabulary.db";
+        db = SQLiteDatabase.openDatabase(pathToVocabulary, null, 0);
     }
 
     public ArrayList<ItemVocabulary> GetRows(int offset){

@@ -75,8 +75,7 @@ public class MyActivity extends  ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            loadDatabase();
+            startActivityForResult(new Intent(this, SettingsActivity.class), 1);
             return true;
         }
         if (id == R.id.action_close){
@@ -85,6 +84,14 @@ public class MyActivity extends  ListActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK){
+            if(data.getBooleanExtra("update",false))
+                loadDatabase();
+        }
     }
 
     @Override
@@ -113,6 +120,9 @@ public class MyActivity extends  ListActivity {
             _vocabularyDatabase.close();
     }
 
+    /**
+     * Load more words for the ListView
+     */
     private class AsyncListViewLoader extends AsyncTask<Void, Void, List<ItemVocabulary>> {
         private ProgressDialog dialog = new ProgressDialog(MyActivity.this);
 
@@ -152,6 +162,9 @@ public class MyActivity extends  ListActivity {
         }
     }
 
+    /**
+     * Update state of the words in database
+     */
     private class AsyncUpdateDatabase extends AsyncTask<ItemVocabulary, Void, Void> {
 
         @Override
