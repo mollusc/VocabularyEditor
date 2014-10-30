@@ -49,15 +49,21 @@ public class VocabularyListAdapter extends ArrayAdapter<ItemVocabulary> {
         }
         TextView wordView = (TextView) convertView.findViewById(R.id.WordView);
         TextView translateView = (TextView) convertView.findViewById(R.id.TranslateView);
+        TextView meetingView = (TextView) convertView.findViewById(R.id.MeetingView);
+
         wordView.setText(i.word);
         translateView.setText(i.translate);
+        meetingView.setText(Integer.toString(i.meeting));
 
         wordView.setTextColor(Color.BLACK);
         translateView.setTextColor(Color.BLACK);
+        meetingView.setTextColor(Color.BLACK);
+
         convertView.setBackgroundColor(Color.WHITE);
 
         if(i.study){
             wordView.setTextColor(_context.getResources().getColor(R.color.text_study_word));
+            meetingView.setTextColor(_context.getResources().getColor(R.color.text_study_word));
             translateView.setTextColor(_context.getResources().getColor(R.color.text_study_word));
         }
 

@@ -78,6 +78,11 @@ public class MyActivity extends  ListActivity {
             startActivityForResult(new Intent(this, SettingsActivity.class), 1);
             return true;
         }
+        if (id == R.id.action_refresh)
+        {
+            loadDatabase();
+            return true;
+        }
         if (id == R.id.action_close){
             finish();
             System.exit(0);

@@ -5,6 +5,10 @@
         android:title="@string/action_settings"
         android:orderInCategory="1"
         android:showAsAction="never" />
+    <item android:id="@+id/action_refresh"
+        android:title="@string/action_refresh"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
     <item android:id="@+id/action_close"
         android:title="@string/action_close"
         android:orderInCategory="100"
