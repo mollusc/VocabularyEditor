@@ -1,5 +1,6 @@
 package com.example.valentine.vocabularyeditor;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -53,8 +54,8 @@ public class MyActivity extends  ListActivity {
         String pathToDatabase = sp.getString("filePicker", "");
         try {
             _vocabularyDatabase = new VocabularyDatabase(pathToDatabase);
-            _offset = 0;
-            _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset));
+            _offset = sp.getInt("savedOffset", 0);
+            _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset * 15));
             setListAdapter(_adapter);
             return;
         }
@@ -157,6 +158,10 @@ public class MyActivity extends  ListActivity {
                 if(_vocabularyDatabase != null) {
                     _offset++;
                     result = _vocabularyDatabase.GetRows(_offset * 15);
+                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MyActivity.this);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putInt("savedOffset", _offset);
+                    editor.commit();
                     return result;
                 }
             }

@@ -6,4 +6,10 @@
         android:title="@string/interface_settings_vocabulary_path"
         android:summary="@string/interface_settings_set_new_vocabulary_path"
         />
+    <com.example.valentine.vocabularyeditor.IntEditTextPreference
+        android:key="savedOffset"
+        android:title="@string/SavedOffset_title"
+        android:numeric="integer"
+        android:defaultValue="0"
+        />
 </PreferenceScreen>

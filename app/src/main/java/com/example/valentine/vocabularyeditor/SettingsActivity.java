@@ -45,8 +45,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
     {
         Preference pref = findPreference(key);
-        String prefixStr = sharedPreferences.getString(key, "");
-        pref.setSummary(prefixStr);
+        try {
+            String prefixStr = sharedPreferences.getString(key, "");
+            pref.setSummary(prefixStr);
+        }
+        catch (Exception ex) {
+        }
+
     }
 
     @Override
@@ -88,6 +93,4 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             }
         }
     }
-
-
 }

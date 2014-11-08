@@ -23,7 +23,7 @@ public class VocabularyDatabase {
     private final int _limit = 15;
 
     public VocabularyDatabase(String pathToVocabulary) {
-        //pathToVocabulary = "/mnt/sdcard/Android/data/com.dropbox.android/files/scratch/LinguaSubtitle/Vocabulary.db";
+        pathToVocabulary = "/mnt/sdcard/Android/data/com.dropbox.android/files/scratch/LinguaSubtitle/Vocabulary.db";
         db = SQLiteDatabase.openDatabase(pathToVocabulary, null, 0);
     }
 

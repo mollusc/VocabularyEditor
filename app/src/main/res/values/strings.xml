@@ -11,4 +11,5 @@
     <string name="interface_settings_vocabulary_path">Путь к файлу словаря</string>
     <string name="interface_settings_set_new_vocabulary_path">Укажите путь к словарю</string>
     <string name="action_refresh">Refresh</string>
+    <string name="SavedOffset_title">Сохраненное положение списка</string>
 </resources>
