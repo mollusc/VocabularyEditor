@@ -40,7 +40,7 @@ public class MyActivity extends  ListActivity {
             @Override
             public void onScroll(AbsListView view, int firstVisible, int visibleCount, int totalCount) {
                 boolean loadMore = firstVisible + visibleCount >= totalCount;
-                if (loadMore && (_loadingTask.getStatus() == AsyncTask.Status.FINISHED || _loadingTask.getStatus() == AsyncTask.Status.PENDING)) {
+                if (totalCount>0 && loadMore && (_loadingTask.getStatus() == AsyncTask.Status.FINISHED || _loadingTask.getStatus() == AsyncTask.Status.PENDING)) {
                     _loadingTask = new AsyncListViewLoader();
                     _loadingTask.execute();
                 }
@@ -55,7 +55,7 @@ public class MyActivity extends  ListActivity {
         try {
             _vocabularyDatabase = new VocabularyDatabase(pathToDatabase);
             _offset = sp.getInt("savedOffset", 0);
-            _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset * 15));
+            _adapter = new VocabularyListAdapter(this,  _vocabularyDatabase.GetRows(_offset * VocabularyDatabase.Limit));
             setListAdapter(_adapter);
             return;
         }
@@ -156,12 +156,12 @@ public class MyActivity extends  ListActivity {
             List<ItemVocabulary> result;
             try {
                 if(_vocabularyDatabase != null) {
-                    _offset++;
-                    result = _vocabularyDatabase.GetRows(_offset * 15);
                     SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MyActivity.this);
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putInt("savedOffset", _offset);
                     editor.commit();
+                    _offset++;
+                    result = _vocabularyDatabase.GetRows(_offset * VocabularyDatabase.Limit);
                     return result;
                 }
             }

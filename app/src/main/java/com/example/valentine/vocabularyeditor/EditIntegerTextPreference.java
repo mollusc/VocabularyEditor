@@ -7,17 +7,17 @@ import android.util.AttributeSet;
 /**
  * Created by valentine on 08.11.14.
  */
-public class IntEditTextPreference extends EditTextPreference {
+public class EditIntegerTextPreference extends EditTextPreference {
 
-    public IntEditTextPreference(Context context) {
+    public EditIntegerTextPreference(Context context) {
         super(context);
     }
 
-    public IntEditTextPreference(Context context, AttributeSet attrs) {
+    public EditIntegerTextPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public IntEditTextPreference(Context context, AttributeSet attrs, int defStyle) {
+    public EditIntegerTextPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

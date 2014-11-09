@@ -40,18 +40,25 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                 return true;
             }
         });
+        Preference savedOffset = findPreference("savedOffset");
+        savedOffset.setSummary(Integer.toString(sp.getInt("savedOffset", 0)));
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
     {
         Preference pref = findPreference(key);
-        try {
+        if (pref instanceof EditTextPreference) {
+            EditTextPreference etp = (EditTextPreference) pref;
+            pref.setSummary(etp.getText());
+        }
+        else
+        {
             String prefixStr = sharedPreferences.getString(key, "");
             pref.setSummary(prefixStr);
         }
-        catch (Exception ex) {
-        }
-
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("update", true);
+        setResult(RESULT_OK, returnIntent);
     }
 
     @Override
@@ -62,14 +69,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                     Uri uri = data.getData();
                     String path = getRealPathFromURI(this, uri);
                     // Write Preferences
+                    String keyPref = "filePicker";
                     SharedPreferences preferences =  PreferenceManager.getDefaultSharedPreferences(this);
                     SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString("filePicker", path);
+                    editor.putString(keyPref, path);
                     editor.commit();
 
-                    Intent returnIntent = new Intent();
-                    returnIntent.putExtra("update", true);
-                    setResult(RESULT_OK, returnIntent);
+                    onSharedPreferenceChanged(preferences,keyPref);
                 }
                 break;
         }
@@ -77,8 +83,23 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Set up a listener whenever a key changes
+        getPreferenceScreen().getSharedPreferences()
+                .registerOnSharedPreferenceChangeListener(this);
+    }
 
-    // http://stackoverflow.com/a/3414749
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Unregister the listener whenever a key changes
+        getPreferenceScreen().getSharedPreferences()
+                .unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+        // http://stackoverflow.com/a/3414749
     public String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
